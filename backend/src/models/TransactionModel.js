@@ -1,0 +1,32 @@
+const mongoose = require('mongoose');
+
+const transactionSchema = new mongoose.Schema({
+    buyer: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+        required,
+    },
+    sellerId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "User", 
+        required: true,
+    },
+    items: [{
+        itemId: { type: mongoose.Schema.Types.ObjectId, ref: "Listing" },
+        quantity: Number,
+        price: Number
+    }],
+    totalAmount: { 
+        type: Number, 
+        required: true 
+    },
+    paymentStatus: { 
+        type: String, 
+        enum: ["pending", "completed", "failed"], 
+        default: "pending" 
+    },
+    invoiceUrl: String,
+});
+
+const Transaction = mongoose.Model('Transaction', transactionSchema);
+module.exports = Transaction;

@@ -11,7 +11,6 @@ const productSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        
     },
     price: {
         type: Number,
@@ -20,10 +19,8 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
     },
-    status: { 
-        type: String,
-        enum: ["stock", "sold"],
-        default: "stock" 
+    quantity: {
+        type: Number,
     },
     likes: [
         { type: mongoose.Schema.Types.ObjectId, ref: "User" }
@@ -31,4 +28,4 @@ const productSchema = new mongoose.Schema({
 });
 
 const Product = mongoose.model('Product', productSchema);
-mondule.exports = Product;
+module.exports = Product;

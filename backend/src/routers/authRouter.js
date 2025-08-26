@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
     }
     catch (err) {
         console.log(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 });
 
@@ -34,11 +34,11 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body; 
     const user = await userModel.findOne({ email: email });
     if (!user) {
-        return res.status(400).json({ error: 'User not found!' });
+        return res.status(400).json({ message: 'User not found!' });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        return res.status(400).json({ error: 'Wrong password!' });
+        return res.status(400).json({ message: 'Wrong password!' });
     }
 
     const token = jwt.sign({ id: user._id}, process.env.ASSIGNMENT_SEED, { expiresIn: '1h'});
@@ -52,6 +52,8 @@ router.post('/login', async (req, res) => {
         token: token,
     });
 });
+
+
 
 /**
  * TODO

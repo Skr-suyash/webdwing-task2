@@ -38,18 +38,6 @@ const userSchema = new mongoose.Schema({
             default: 1,
         }
     }],
-    sellerProfile: {
-        storeName: String,
-        rating: Number,
-        products: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
-        }],
-        revenue: {
-            type: Number,
-            default: 0,
-        }
-    },
     transactionHistory: [{
         transactionId: {
             type: mongoose.Schema.Types.ObjectId,

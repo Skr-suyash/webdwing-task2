@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 // Routers
 const authRouter = require('./routers/authRouter');
 const contentRouter = require('./routers/contentRouter');
+const cartRouter = require('./routers/cartRouter.js');
 
 // Middleware
 app.use(express.json());
@@ -17,6 +18,7 @@ app.use(cors());
 
 app.use('/api/auth', authRouter);
 app.use('/api/content', contentRouter);
+app.use('/api/cart', cartRouter);
 
 // Routes
 app.get('/', (req, res) => {

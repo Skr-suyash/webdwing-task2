@@ -21,15 +21,15 @@ const userSchema = new mongoose.Schema({
         ref: 'Product',
     }],
     profile: {
-        location: String,
-        contact: String,
-        storeName: String,
-        rating: Number,
-        listings: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
-        }]
+        location: { type: String, default: "" },
+        contact: { type: String, default: "" },
+        storeName: { type: String, default: "" },
+        rating: { type: Number, default: 0 }
     },
+    listings: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+    }],
     cart: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,

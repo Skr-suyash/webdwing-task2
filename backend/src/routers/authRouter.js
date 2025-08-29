@@ -1,5 +1,6 @@
 const express = require('express');
 const userModel = require('../models/UserModel');
+const transactionHistory = require('../models/TransactionModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -53,6 +54,70 @@ router.post('/login', async (req, res) => {
     });
 });
 
+/** Get profile */
+
+router.get('/profile', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const user = await userModel.findById(userId)
+            .populate('favourites', 'name price');
+
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        // fetch full transaction history separately
+        const transactions = await transactionHistory.find({ buyer: userId })
+            .populate('sellerId', 'name email profile.storeName')
+            .populate({
+                path: 'items.itemId',
+                model: 'Product',
+                select: 'name price'
+            })
+            .sort({ createdAt: -1 });
+
+        res.status(200).send({
+            message: "Profile fetched successfully",
+            profile: user.profile,
+            email: user.email,
+            role: user.role,
+            favourites: user.favourites,
+            transactionHistory: transactions
+        });
+    } catch (err) {
+        console.error("View profile failed:", err);
+        res.status(500).send({ message: "Internal server error" });
+    }
+});
+
+/* Update profile */
+router.patch('/profile', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { location, contact, storeName, rating } = req.body;
+
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        if (location !== undefined) user.profile.location = location;
+        if (contact !== undefined) user.profile.contact = contact;
+        if (storeName !== undefined) user.profile.storeName = storeName;
+        if (rating !== undefined) user.profile.rating = rating;
+
+        await user.save();
+
+        res.status(200).send({
+            message: "Profile updated successfully",
+            profile: user.profile
+        });
+    } catch (err) {
+        console.error("Update profile failed:", err);
+        res.status(500).send({ message: "Internal server error" });
+    }
+});
 
 
 /**

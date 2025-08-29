@@ -1,17 +1,12 @@
 async function processMockPayment({ amount, currency, orderId }) {
-  // Simulate network delay
-  await new Promise(r => setTimeout(r, 500));
+  // Simulate processing delay
+  await new Promise(r => setTimeout(r, 300));
 
-  // Always succeed (you can randomize for testing failures)
+  // Always succeed (or randomize for testing)
   return {
     success: true,
     chargeId: `MOCK_${Date.now()}`,
-    meta: {
-      note: 'Mock payment processed successfully',
-      orderId,
-      amount,
-      currency
-    }
+    meta: { orderId, amount, currency }
   };
 }
 

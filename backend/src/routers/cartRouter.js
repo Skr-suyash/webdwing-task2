@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', verifyToken, async (req, res) => {
     const userId = req.user.id;
     try {
-        const user = await userModel.findById(id);
+        const user = await userModel.findById(userId);
         const cartItems = user.cart;
 
         return res.status(200).json(cartItems);
@@ -47,6 +47,50 @@ router.post('/product/:productId', verifyToken, async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(200).send({ message: 'Internal Server Error' });
+    }
+});
+
+/** To remove product from cart  */
+
+router.delete('/product/:productId', verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const { productId } = req.params;
+    try {
+        const user = await userModel.findById(userId);
+        user.cart = user.cart.filter((item) => {
+            item.productId != productId;
+        });
+        await user.save();
+        res.status(200).send('Product deleted successfully');
+    } catch (err) {
+        console.log(err);
+        res.status(200).send({ message: 'Internal Server Error' });
+    }
+});
+
+/** To increase product quantity in cart */
+
+router.patch('/product/:productId', verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const { productId } = req.params;
+    const user = await userModel.findById(userId);
+    try {
+        const product = await productModel.findById(productId);
+        if (!product) {
+            res.status(404).send('Product not found');
+        }
+        const cartItem = user.cart.find(
+            item => item.productId == productId
+        );
+        if (!cartItem) {
+            return res.status(404).send('Product not in cart');
+        }
+
+        cartItem.quantity += 1;
+        await user.save();
+        res.status(200).send(`Incremented successfully. New value ${cartItem.quantity}`);
+    } catch(err) {
+        res.status(500).send({ message: 'Internal Server Error' });
     }
 });
 

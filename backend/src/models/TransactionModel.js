@@ -4,7 +4,7 @@ const transactionSchema = new mongoose.Schema({
     buyer: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
-        required,
+        required: true,
     },
     sellerId: { 
         type: mongoose.Schema.Types.ObjectId, 
@@ -28,5 +28,5 @@ const transactionSchema = new mongoose.Schema({
     invoiceUrl: String,
 });
 
-const Transaction = mongoose.Model('Transaction', transactionSchema);
+const Transaction = mongoose.model('Transaction', transactionSchema);
 module.exports = Transaction;

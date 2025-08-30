@@ -5,6 +5,7 @@ const userModel = require('../models/UserModel');
 const router = express.Router();
 const verifyToken = require('../middleware/verifyToken');
 const { verify } = require('jsonwebtoken');
+const upload = require('../middleware/multer');
 
 /** Get all products */
 router.get('/products', async (req, res) => {
@@ -35,7 +36,7 @@ router.get('/users/:userId/products', verifyToken, async (req, res) => {
 
 /* Add edit and delete products  */
 
-router.post('/products', verifyToken, async (req, res) => {
+router.post('/products', verifyToken, upload.single('image'), async (req, res) => {
     const { name, description, price, category, quantity } = req.body;
     const sellerId = req.user.id;
     try {
@@ -45,6 +46,7 @@ router.post('/products', verifyToken, async (req, res) => {
             description,
             price,
             category,
+            imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
             quantity,
         });
         await product.save();

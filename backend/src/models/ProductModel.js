@@ -61,6 +61,9 @@ const productSchema = new mongoose.Schema({
     quantity: {
         type: Number,
     },
+    imageUrl: {
+        type: String,
+    },
     sku: {
         type: String,
         unique: true,

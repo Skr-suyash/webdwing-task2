@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const { requestLogger, getLogs } = require('./middleware/requestLogger.js');
 require('dotenv').config();
 require('./db/db.js');
 
@@ -24,6 +25,7 @@ if (!fs.existsSync(uploadDir)) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(requestLogger);
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 app.use('/api/auth', authRouter);
@@ -35,6 +37,14 @@ app.use('/api/cart', checkoutRouter);
 app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
+
+app.get('/169/healthz', (req, res) => {
+    res.status(200).json({ status: "ok! healthy", uptime: process.uptime() });
+});
+
+app.get('/logs/recent', (req, res) => {
+    res.status(200).send(getLogs());
+})
 
 // Start server
 app.listen(PORT, () => {

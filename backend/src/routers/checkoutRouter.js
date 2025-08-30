@@ -91,7 +91,8 @@ router.post('/checkout', checkoutLimiter, verifyToken, async (req, res) => {
                 sellerId,
                 items: data.items,
                 totalAmount: finalAmount,
-                paymentStatus: "pending"
+                paymentStatus: "pending",
+                transactionTime: new Date(),
             }], { session });
 
             // Process payment for this seller

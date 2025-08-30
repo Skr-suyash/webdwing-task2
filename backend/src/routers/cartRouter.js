@@ -5,6 +5,7 @@ const verifyToken = require('../middleware/verifyToken');
 
 const router = express.Router();
 
+// view cart
 router.get('/', verifyToken, async (req, res) => {
     const userId = req.user.id;
     try {
@@ -18,6 +19,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
+// add to cart
 router.post('/product/:productId', verifyToken, async (req, res) => {
     const { productId } = req.params;
     const product = await productModel.findById(productId);

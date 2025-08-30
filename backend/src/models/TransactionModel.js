@@ -26,6 +26,10 @@ const transactionSchema = new mongoose.Schema({
         default: "pending" 
     },
     invoiceUrl: String,
+    transactionTime: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);

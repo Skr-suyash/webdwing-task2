@@ -20,7 +20,7 @@ router.get('/products', async (req, res) => {
     }
 });
 
-router.get('/users/:userId/products', verifyToken, async (req, res) => {
+router.get('/products/users/:userId', verifyToken, async (req, res) => {
     const { userId } = req.params;
     if (userId != req.user.id) {
         return res.status(403).json({ message: 'Forbidden' });

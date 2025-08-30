@@ -1,26 +1,46 @@
 const express = require('express');
+const crypto = require('crypto');
 require('dotenv').config();
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const verifyToken = require('../middleware/verifyToken');
 
 const userModel = require('../models/UserModel');
 const productModel = require('../models/ProductModel');
 const transactionModel = require('../models/TransactionModel');
+const idempotencyModel = require('../models/IdempotencyModel');
 
 const { processMockPayment } = require('../mocks/payment');
+
+// rate limiter
+const checkoutLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 7,
+    message: { error: "Too many checkout requests, please try again later." }
+});
 
 function computeFee(subtotal) {
 
     const seedString = process.env.ASSIGNMENT_SEED.toString();
     const seed = Number(seedString.split('-')[1]);
     console.log(seed);
-    
+
     return Math.floor(0.017 * subtotal + seed);
 }
 
-router.post('/checkout', verifyToken, async (req, res) => {
+router.post('/checkout', checkoutLimiter, verifyToken, async (req, res) => {
     const buyerId = req.user.id;
+
+    const idempotencyKey = req.header('Idempotency-Key');
+    if (!idempotencyKey) {
+        return res.status(400).send('Idempotency Key is required');
+    }
+
+    let existingKey = await idempotencyModel.findOne({ key: idempotencyKey });
+    if (existingKey) {
+        res.status(200).json(existingKey.response);
+    }
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -63,7 +83,7 @@ router.post('/checkout', verifyToken, async (req, res) => {
 
             const platformFee = computeFee(data.total);
             console.log(platformFee);
-            
+
             const finalAmount = data.total + platformFee;
 
             const [transaction] = await transactionModel.create([{
@@ -99,13 +119,23 @@ router.post('/checkout', verifyToken, async (req, res) => {
         user.cart = [];
         await user.save({ session });
 
+        // send result
+        const result = {
+            message: "Checkout successful",
+            transactions
+        };
+
+        await idempotencyModel.create({ key: idempotencyKey, response: result });
+
         await session.commitTransaction();
         session.endSession();
 
-        return res.status(200).send({
-            message: "Checkout successful",
-            transactions
-        });
+        const signature = crypto
+            .createHmac('sha256', process.env.ASSIGNMENT_SEED)
+            .update(JSON.stringify(result))
+            .digest('hex');
+
+        return res.set('X-Signature', signature).status(200).send(result);
 
     } catch (err) {
         await session.abortTransaction();

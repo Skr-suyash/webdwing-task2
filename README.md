@@ -2,7 +2,7 @@
 
 API fora reselling platform where users can buy and sell goods
 
-## Importanr Links
+## Important Links
 
 1. Live link - https://webdwing-task2.onrender.com/
 
